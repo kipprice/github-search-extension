@@ -1,0 +1,10 @@
+{
+  "name": "Github Search",
+  "version": "1.0",
+  "description": "Easy search for Github issues by date and user",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage"]
+}
