@@ -7,6 +7,7 @@ declare var chrome: any;
 
 export const App: React.FC = () => {
   const [usernames, setUsernames] = useState("");
+  const [usernameHx, setUsernameHx] = useState("");
   const [roles, setRoles] = useState<{ author: boolean; commenter: boolean }>({
     author: true,
     commenter: false,
@@ -20,6 +21,7 @@ export const App: React.FC = () => {
     chrome.storage.local.get(
       [
         "usernames",
+        "usernameHx",
         "startDate",
         "endDate",
         "orgs",
@@ -30,6 +32,9 @@ export const App: React.FC = () => {
       (result: any) => {
         if (result.usernames) {
           setUsernames(result.usernames);
+        }
+        if (result.usernameHx) {
+          setUsernameHx(result.usernameHx);
         }
         if (result.startDate) {
           setStartDate(result.startDate);
@@ -56,6 +61,7 @@ export const App: React.FC = () => {
     chrome.storage.local.set(
       {
         usernames,
+        usernameHx: `${usernameHx ? `${usernameHx},` : ""}${usernames}`,
         startDate,
         endDate,
         orgs,
@@ -115,15 +121,23 @@ export const App: React.FC = () => {
     window.open(`https://github.com/search?q=${queryPieces.join("+")}`);
   }, [usernames, startDate, endDate, orgs, branches, roles]);
 
+  const userSet = new Set(usernameHx.split(","));
+
   return (
     <StyledContainer>
       <label>
         Github Usernames:
         <StyledInput
+          list="username-hx"
           value={usernames}
           onChange={(e) => setUsernames(e.target.value)}
           onBlur={storeLocally}
         />
+        <datalist id="username-hx">
+          {[...userSet].map((us) => (
+            <option value={us} />
+          ))}
+        </datalist>
       </label>
 
       <Spacer h={0.5} />
