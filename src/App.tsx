@@ -246,8 +246,8 @@ export const App: React.FC = () => {
       <StyledCTAButton onClick={search}>Search</StyledCTAButton>
       <Spacer />
       <div style={{ fontFamily: fontBase, textAlign: "center" }}>
-        Any blank fields will be ignored in the query. Fields that accept
-        multiples expect the lists to be comma-delimited
+        Any blank fields will be ignored in the query. Plural fields can accept
+        a single value, or a list of comma-delimited values.
       </div>
     </StyledContainer>
   );

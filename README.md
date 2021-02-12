@@ -2,7 +2,7 @@
 
 Allows for searching PRs by a particular user or time period (or both) through a Chrome extension.
 
-![Github Search UI](sample.png?raw=true "Sample")
+![Github Search UI](sample.png?raw=true "Github Search UI")
 
 ## Using
 
