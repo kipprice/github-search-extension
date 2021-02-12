@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { Container, CTAButton } from "@codecademy/gamut";
-import { fontAccent } from "@codecademy/gamut-styles";
+import { fontAccent, fontBase } from "@codecademy/gamut-styles";
 
 declare var chrome: any;
 
@@ -118,7 +118,7 @@ export const App: React.FC = () => {
   return (
     <StyledContainer>
       <label>
-        Username:
+        Github Usernames:
         <StyledInput
           value={usernames}
           onChange={(e) => setUsernames(e.target.value)}
@@ -199,6 +199,11 @@ export const App: React.FC = () => {
       <Spacer />
 
       <CTAButton onClick={search}>Search</CTAButton>
+      <Spacer />
+      <span style={{ fontFamily: fontBase }}>
+        (All fields that accept multiples expect the lists to be
+        comma-delimited)
+      </span>
     </StyledContainer>
   );
 };
