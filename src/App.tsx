@@ -16,7 +16,9 @@ export const App: React.FC = () => {
   const [endDate, setEndDate] = useState("");
   const [orgs, setOrgs] = useState("");
   const [branches, setBranches] = useState("");
+  const [repos, setRepos] = useState("");
 
+  // ==> retrieve the last search from local storage
   useEffect(() => {
     chrome.storage.local.get(
       [
@@ -28,6 +30,7 @@ export const App: React.FC = () => {
         "branches",
         "asAuthor",
         "asCommenter",
+        "repos",
       ],
       (result: any) => {
         if (result.usernames) {
@@ -48,6 +51,9 @@ export const App: React.FC = () => {
         if (result.branches) {
           setBranches(result.branches);
         }
+        if (result.repos) {
+          setRepos(result.repos);
+        }
         setRoles({
           author: result.asAuthor === undefined ? true : result.asAuthor,
           commenter:
@@ -57,6 +63,7 @@ export const App: React.FC = () => {
     );
   }, []);
 
+  // ==> update the last search in local storage
   const storeLocally = useCallback(() => {
     chrome.storage.local.set(
       {
@@ -68,11 +75,13 @@ export const App: React.FC = () => {
         branches,
         asAuthor: roles.author,
         asCommenter: roles.commenter,
+        repos,
       },
       () => null
     );
-  }, [usernames, startDate, endDate, orgs, branches, roles]);
+  }, [usernames, startDate, endDate, orgs, branches, roles, repos]);
 
+  // ==> actually generate the search URL
   const search = useCallback(() => {
     const queryPieces = [];
     const splitOrgs = orgs.split(",");
@@ -89,6 +98,14 @@ export const App: React.FC = () => {
         continue;
       }
       queryPieces.push(encodeURIComponent(`base:${b}`));
+    }
+
+    const splitRepos = repos.split(",");
+    for (let r of splitRepos) {
+      if (!r) {
+        continue;
+      }
+      queryPieces.push(encodeURIComponent(`repo:${r}`));
     }
 
     const splitUsernames = usernames.split(",");
@@ -119,9 +136,9 @@ export const App: React.FC = () => {
     queryPieces.push("is:pr");
 
     window.open(`https://github.com/search?q=${queryPieces.join("+")}`);
-  }, [usernames, startDate, endDate, orgs, branches, roles]);
+  }, [usernames, startDate, endDate, orgs, branches, roles, repos]);
 
-  const userSet = new Set(usernameHx.split(","));
+  const userSet = [...new Set(usernameHx.split(","))];
 
   return (
     <StyledContainer>
@@ -132,9 +149,10 @@ export const App: React.FC = () => {
           value={usernames}
           onChange={(e) => setUsernames(e.target.value)}
           onBlur={storeLocally}
+          placeholder="e.g. userA,userB"
         />
         <datalist id="username-hx">
-          {[...userSet].map((us) => (
+          {userSet.map((us) => (
             <option value={us} />
           ))}
         </datalist>
@@ -197,6 +215,18 @@ export const App: React.FC = () => {
           value={orgs}
           onChange={(e) => setOrgs(e.target.value)}
           onBlur={storeLocally}
+          placeholder="e.g. orgA,userB"
+        />
+      </label>
+      <Spacer />
+
+      <label>
+        Repos:
+        <StyledInput
+          value={repos}
+          onChange={(e) => setRepos(e.target.value)}
+          onBlur={storeLocally}
+          placeholder="e.g. orgA/repoA,userB/repoB"
         />
       </label>
       <Spacer />
@@ -207,17 +237,18 @@ export const App: React.FC = () => {
           value={branches}
           onChange={(e) => setBranches(e.target.value)}
           onBlur={storeLocally}
+          placeholder="e.g. main,develop"
         />
       </label>
       <Spacer />
       <Spacer />
 
-      <CTAButton onClick={search}>Search</CTAButton>
+      <StyledCTAButton onClick={search}>Search</StyledCTAButton>
       <Spacer />
-      <span style={{ fontFamily: fontBase }}>
-        (All fields that accept multiples expect the lists to be
-        comma-delimited)
-      </span>
+      <div style={{ fontFamily: fontBase, textAlign: "center" }}>
+        Any blank fields will be ignored in the query. Fields that accept
+        multiples expect the lists to be comma-delimited
+      </div>
     </StyledContainer>
   );
 };
@@ -240,4 +271,11 @@ const Spacer = styled.span<{ w?: number; h?: number }>`
   width: ${(p) => p.w || 1}rem;
   height: ${(p) => (p.h == undefined ? 1 : p.h)}rem;
   display: ${(p) => (p.h === 0 ? "inline-block" : "block")};
+`;
+
+const StyledCTAButton = styled(CTAButton)`
+  width: 100%;
+  span {
+    justify-content: center;
+  }
 `;
