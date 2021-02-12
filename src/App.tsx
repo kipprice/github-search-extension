@@ -1,12 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { CTAButton } from "@codecademy/gamut";
+import { Container, CTAButton } from "@codecademy/gamut";
 import { fontAccent } from "@codecademy/gamut-styles";
 
 declare var chrome: any;
 
 export const App: React.FC = () => {
   const [usernames, setUsernames] = useState("");
+  const [roles, setRoles] = useState<{ author: boolean; commenter: boolean }>({
+    author: true,
+    commenter: false,
+  });
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [orgs, setOrgs] = useState("");
@@ -14,7 +18,15 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     chrome.storage.local.get(
-      ["usernames", "startDate", "endDate", "orgs", "branches"],
+      [
+        "usernames",
+        "startDate",
+        "endDate",
+        "orgs",
+        "branches",
+        "asAuthor",
+        "asCommenter",
+      ],
       (result: any) => {
         if (result.usernames) {
           setUsernames(result.usernames);
@@ -31,6 +43,11 @@ export const App: React.FC = () => {
         if (result.branches) {
           setBranches(result.branches);
         }
+        setRoles({
+          author: result.asAuthor === undefined ? true : result.asAuthor,
+          commenter:
+            result.asCommenter === undefined ? false : result.asCommenter,
+        });
       }
     );
   }, []);
@@ -43,10 +60,12 @@ export const App: React.FC = () => {
         endDate,
         orgs,
         branches,
+        asAuthor: roles.author,
+        asCommenter: roles.commenter,
       },
       () => null
     );
-  }, [usernames, startDate, endDate, orgs, branches]);
+  }, [usernames, startDate, endDate, orgs, branches, roles]);
 
   const search = useCallback(() => {
     const queryPieces = [];
@@ -71,7 +90,12 @@ export const App: React.FC = () => {
       if (!u) {
         continue;
       }
-      queryPieces.push(encodeURIComponent(`author:${u}`));
+      if (roles.author) {
+        queryPieces.push(encodeURIComponent(`author:${u}`));
+      }
+      if (roles.commenter) {
+        queryPieces.push(encodeURIComponent(`commenter:${u}`));
+      }
     }
 
     if (startDate && endDate) {
@@ -89,7 +113,7 @@ export const App: React.FC = () => {
     queryPieces.push("is:pr");
 
     window.open(`https://github.com/search?q=${queryPieces.join("+")}`);
-  }, [usernames, startDate, endDate, orgs, branches]);
+  }, [usernames, startDate, endDate, orgs, branches, roles]);
 
   return (
     <StyledContainer>
@@ -101,6 +125,34 @@ export const App: React.FC = () => {
           onBlur={storeLocally}
         />
       </label>
+
+      <Spacer h={0.5} />
+      <Container align="baseline">
+        <StyledLabel>
+          <input
+            type="checkbox"
+            checked={!!roles.author}
+            onChange={(e) => setRoles({ ...roles, author: !roles.author })}
+            onBlur={storeLocally}
+          />
+          &nbsp;As author
+        </StyledLabel>
+
+        <Spacer h={0} />
+
+        <StyledLabel>
+          <input
+            type="checkbox"
+            checked={!!roles.commenter}
+            onChange={(e) =>
+              setRoles({ ...roles, commenter: !roles.commenter })
+            }
+            onBlur={storeLocally}
+          />
+          &nbsp;As commenter
+        </StyledLabel>
+      </Container>
+
       <Spacer />
 
       <label>
@@ -160,7 +212,13 @@ const StyledInput = styled.input`
   width: 20rem;
 `;
 
-const Spacer = styled.div`
-  width: 16px;
-  height: 16px;
+const StyledLabel = styled.label`
+  display: flex;
+  align-items: center;
+`;
+
+const Spacer = styled.span<{ w?: number; h?: number }>`
+  width: ${(p) => p.w || 1}rem;
+  height: ${(p) => (p.h == undefined ? 1 : p.h)}rem;
+  display: ${(p) => (p.h === 0 ? "inline-block" : "block")};
 `;
