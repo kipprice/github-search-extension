@@ -45,6 +45,7 @@
     "@codecademy/gamut-styles": "^7.7.3",
     "@emotion/react": "^11.1.5",
     "@emotion/styled": "^11.1.5",
+    "date-fns": "^2.28.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }
