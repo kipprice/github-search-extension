@@ -30,7 +30,7 @@ export const SaveForm: React.FC<SaveFormProps> = ({ details, setDetails }) => {
         relStartDate = start
           ? differenceInCalendarDays(start, today)
           : undefined;
-          
+
         relEndDate = end ? differenceInCalendarDays(end, today) : undefined;
       } else {
         relStartDate = undefined;
@@ -77,7 +77,9 @@ export const SaveForm: React.FC<SaveFormProps> = ({ details, setDetails }) => {
               <div>
                 Start:{" "}
                 <b>
-                  {details.relStartDate
+                  {details.relStartDate === 0
+                    ? "today"
+                    : details.relStartDate !== undefined
                     ? `${Math.abs(details.relStartDate)} day(s) ${
                         details.relStartDate < 0 ? "ago" : "from now"
                       }`
@@ -86,11 +88,13 @@ export const SaveForm: React.FC<SaveFormProps> = ({ details, setDetails }) => {
               </div>
             ) : null}
             <Spacer />
-            {details.relStartDate || details.startDate ? (
+            {details.relEndDate || details.endDate ? (
               <div>
                 End:{" "}
                 <b>
-                  {details.relEndDate
+                  {details.relEndDate === 0
+                    ? "today"
+                    : details.relEndDate !== undefined
                     ? `${Math.abs(details.relEndDate)} day(s) ${
                         details.relEndDate < 0 ? "ago" : "from now"
                       }`

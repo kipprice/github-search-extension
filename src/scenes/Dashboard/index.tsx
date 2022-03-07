@@ -17,10 +17,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ searches, onSearch, onEdit
     const onSearchSelected = useCallback((s: SavedSearch, action: 'search' | 'edit') => {
         const dtFmt = 'yyyy-MM-dd';
 
-        if (s.relStartDate || s.relEndDate) {
+        if (s.relStartDate !== undefined || s.relEndDate !== undefined) {
             const today = new Date();
-            s.startDate = s.relStartDate ? format(addDays(today, s.relStartDate), dtFmt) : s.startDate;
-            s.endDate = s.relEndDate ? format(addDays(today, s.relEndDate), dtFmt) : s.endDate;
+            s.startDate = s.relStartDate !== undefined ? format(addDays(today, s.relStartDate), dtFmt) : s.startDate;
+            s.endDate = s.relEndDate !== undefined ? format(addDays(today, s.relEndDate), dtFmt) : s.endDate;
         }
 
         if (action === 'search') {
